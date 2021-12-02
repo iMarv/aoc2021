@@ -1,52 +1,42 @@
 testinput :: [Command]
-testinput = [(Forward, 5), (Down, 5), (Forward, 8), (Up, 3), (Down, 8), (Forward, 2)]
+testinput = [(F, 5), (D, 5), (F, 8), (U, 3), (D, 8), (F, 2)]
 
-data Action = Forward | Up | Down deriving (Enum, Eq)
+data Action = F | U | D deriving (Enum, Eq)
 
 type Command = (Action, Int)
 
 commandToInt :: Command -> Int
-commandToInt (Forward, num) = num
-commandToInt (Up, num) = num * (-1)
-commandToInt (Down, num) = num
+commandToInt (F, num) = num
+commandToInt (U, num) = num * (-1)
+commandToInt (D, num) = num
 
 sumDepth :: [Command] -> Int
 sumDepth cmds = sum nums
   where
-    cmds' = filter (\a -> fst a /= Forward) cmds
+    cmds' = filter (\a -> fst a /= F) cmds
     nums = map commandToInt cmds'
 
 sumForwards :: [Command] -> Int
 sumForwards cmds = sum fwds
   where
-    fwds = map snd (filter (\a -> fst a == Forward) cmds)
+    fwds = map snd (filter (\a -> fst a == F) cmds)
 
 solveFor1 :: [Command] -> Int
 solveFor1 cmds = sumForwards cmds * sumDepth cmds
 
-aimDepthPos :: [Command] -> Int -> Int -> Int -> Int
-aimDepthPos cmds aim depth pos
-  | null cmds = pos * depth
-  | isUp = recur (aim - x) depth pos
-  | isDown = recur (aim + x) depth pos
-  | isFwd = recur aim (depth + (aim * x)) (pos + x)
-  | otherwise = error "Ooops!"
-  where
-    cmd = head cmds
-    act = fst cmd
-    x = snd cmd
-    isUp = act == Up
-    isDown = act == Down
-    isFwd = act == Forward
-    recur = aimDepthPos (tail cmds)
+aim :: [Command] -> Int -> Int -> Int -> Int
+aim [] _ p d = p * d
+aim ((U, num) : xs) aim' depth pos = aim xs (aim' - num) depth pos
+aim ((D, num) : xs) aim' depth pos = aim xs (aim' + num) depth pos
+aim ((F, num) : xs) aim' depth pos = aim xs aim' (depth + (aim' * num)) (pos + num)
 
 solveFor2 :: [Command] -> Int
-solveFor2 vals = aimDepthPos vals 0 0 0
+solveFor2 vals = aim vals 0 0 0
 
 readAction :: String -> Action
-readAction "forward" = Forward
-readAction "up" = Up
-readAction "down" = Down
+readAction "forward" = F
+readAction "up" = U
+readAction "down" = D
 readAction _ = error "Unknown action"
 
 readCmd :: String -> Command
