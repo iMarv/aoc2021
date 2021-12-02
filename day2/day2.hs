@@ -24,6 +24,25 @@ sumForwards cmds = sum fwds
 solveFor1 :: [Command] -> Int
 solveFor1 cmds = sumForwards cmds * sumDepth cmds
 
+aimDepthPos :: [Command] -> Int -> Int -> Int -> Int
+aimDepthPos cmds aim depth pos
+  | null cmds = pos * depth
+  | isUp = recur (aim - x) depth pos
+  | isDown = recur (aim + x) depth pos
+  | isFwd = recur aim (depth + (aim * x)) (pos + x)
+  | otherwise = error "Ooops!"
+  where
+    cmd = head cmds
+    act = fst cmd
+    x = snd cmd
+    isUp = act == Up
+    isDown = act == Down
+    isFwd = act == Forward
+    recur = aimDepthPos (tail cmds)
+
+solveFor2 :: [Command] -> Int
+solveFor2 vals = aimDepthPos vals 0 0 0
+
 readAction :: String -> Action
 readAction "forward" = Forward
 readAction "up" = Up
@@ -41,3 +60,5 @@ solve = do
   let vals = map readCmd (lines content)
   print "1"
   print (solveFor1 vals)
+  print "2"
+  print (solveFor2 vals)
